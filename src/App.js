@@ -1,25 +1,31 @@
-import logo from './logo.svg';
+import { useEffect } from 'react';
+import { connect } from 'react-redux';
+import { geoReceiver } from './helpers/ReceiveData';
+import { geoSender } from './helpers/SendData';
+import MapContainer from './components/MapContainer';
+import ControlPannel from './components/ControlPannel';
+
 import './App.css';
 
-function App() {
+function App({ groupData, userData, geoReceiver }) {
+  useEffect(() => {
+    geoReceiver(groupData.id);
+  }, [groupData.id]);
+
+  useEffect(() => {
+    geoSender(groupData.id, userData.id);
+  }, [groupData.id, userData.id]);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <MapContainer />
+      <ControlPannel />
     </div>
   );
 }
 
-export default App;
+const mapStateToProps = ({ groupData, userData }) => {
+  return { groupData, userData };
+};
+
+export default connect(mapStateToProps, { geoReceiver })(App);
