@@ -1,9 +1,24 @@
 import { database } from '../services/firebase';
-import { geoDataRequested, geoDataLoaded, geoDataError } from '../actions';
+import {
+  geoDataRequested,
+  geoDataLoaded,
+  geoDataError,
+  usersDataRequested,
+  usersDataLoaded,
+  usersDataError,
+} from '../actions';
 
 export const geoReceiver = (groupId) => (dispatch) => {
   if (groupId) {
+    dispatch(usersDataRequested());
     dispatch(geoDataRequested());
+    database.ref(groupId + '/users').on('value', (snapshot) => {
+      if (snapshot.exists()) {
+        dispatch(usersDataLoaded(snapshot.val()));
+      } else {
+        dispatch(usersDataError('Список участников недоступен'));
+      }
+    });
     database.ref(groupId + '/geo').on('value', (snapshot) => {
       if (snapshot.exists()) {
         dispatch(geoDataLoaded(snapshot.val()));
@@ -12,6 +27,8 @@ export const geoReceiver = (groupId) => (dispatch) => {
       }
     });
   } else {
+    database.ref(groupId + '/users').off();
+    dispatch(usersDataLoaded(null));
     database.ref(groupId + '/geo').off();
     dispatch(geoDataLoaded(null));
   }

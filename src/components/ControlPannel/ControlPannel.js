@@ -5,23 +5,34 @@ import {
   setGroupDataError,
   setUserDataId,
   setUserDataError,
+  addHiddenUser,
+  excludeHiddenUser,
+  clearHiddenList,
 } from '../../actions';
-import { createGroup, createUser } from '../../helpers/SendData';
+import { createGroup, createUser, updateName } from '../../helpers/SendData';
 import { checkDataExistence } from '../../helpers/ReceiveData';
+import { colors } from '../../constants';
 import './ControlPannel.css';
 
 function ControlPannel({
   groupData,
   userData,
+  usersData,
+  settingData,
   setGroupDataId,
   setGroupDataError,
   setUserDataId,
   setUserDataError,
+  addHiddenUser,
+  excludeHiddenUser,
+  clearHiddenList,
   createGroup,
   createUser,
 }) {
   const [groupId, setGroupId] = useState('pass1');
   const [userId, setUserId] = useState('');
+  const [userName, setUserName] = useState('');
+  const [userNameError, setUserNameError] = useState('');
   const [activePannel, setActivePannel] = useState('group');
 
   const joinToGroup = async () => {
@@ -43,6 +54,7 @@ function ControlPannel({
   };
 
   const leftGroup = () => {
+    clearHiddenList();
     leftUser();
     setGroupDataId(null);
   };
@@ -51,6 +63,7 @@ function ControlPannel({
     const idIsExist = await checkDataExistence(groupId + '/geo/' + userId);
     if (idIsExist) {
       setUserDataId(userId);
+      setUserName(usersData.data[userId].name);
     } else {
       setUserDataError('Пользователь с таким id не найден');
     }
@@ -61,12 +74,44 @@ function ControlPannel({
     if (isIdTaken) {
       setUserDataError('Пользователь с такиим id уже существует');
     } else {
-      createUser(groupId, userId);
+      let newUserName = 'user';
+      let k = 1;
+      while (
+        typeof usersData.data === 'object' &&
+        Object.values(usersData.data).some(
+          ({ name }) => name === newUserName + ' ' + k
+        )
+      ) {
+        k++;
+      }
+      createUser(
+        groupId,
+        userId,
+        newUserName + ' ' + k,
+        colors[Object.keys(usersData.data).length]
+      );
     }
   };
 
   const leftUser = () => {
     setUserDataId(null);
+  };
+
+  const changeName = () => {
+    if (Object.values(usersData.data).some(({ name }) => name === userName)) {
+      setUserNameError('Пользователь с таким именем уже существует');
+    } else {
+      setUserNameError('');
+      updateName(groupId, userId, userName);
+    }
+  };
+
+  const toggleUserHidden = (userId) => {
+    if (settingData.hiddenUsers.includes(userId)) {
+      excludeHiddenUser(userId);
+    } else {
+      addHiddenUser(userId);
+    }
   };
 
   return (
@@ -118,7 +163,27 @@ function ControlPannel({
                 </button>
               </>
             ) : (
-              <button onClick={leftGroup}>Покинуть группу</button>
+              <>
+                {usersData.data && (
+                  <ul className="user-list">
+                    {Object.keys(usersData.data).map((userId) => (
+                      <li
+                        key={userId}
+                        className={`user-item ${
+                          settingData.hiddenUsers.includes(userId) && 'inactive'
+                        }`}
+                        style={{
+                          backgroundColor: usersData.data[userId].color,
+                        }}
+                        onClick={() => toggleUserHidden(userId)}
+                      >
+                        {usersData.data[userId].name}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <button onClick={leftGroup}>Покинуть группу</button>
+              </>
             )}
           </>
         )}
@@ -152,7 +217,28 @@ function ControlPannel({
                 </button>
               </>
             ) : (
-              <button onClick={leftUser}>Покинуть профиль пользователя</button>
+              <>
+                <label>
+                  Имя
+                  <input
+                    type="text"
+                    name="name"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    onKeyPress={({ key }) => key === 'Enter' && changeName()}
+                  />
+                  <span className="error">{userNameError}</span>
+                </label>
+                <button
+                  disabled={usersData.data[userId].name === userName}
+                  onClick={changeName}
+                >
+                  Поменять имя
+                </button>
+                <button onClick={leftUser}>
+                  Покинуть профиль пользователя
+                </button>
+              </>
             )}
           </>
         )}
@@ -161,8 +247,8 @@ function ControlPannel({
   );
 }
 
-const mapStateToProps = ({ groupData, userData }) => {
-  return { groupData, userData };
+const mapStateToProps = ({ groupData, userData, usersData, settingData }) => {
+  return { groupData, userData, usersData, settingData };
 };
 
 export default connect(mapStateToProps, {
@@ -170,6 +256,9 @@ export default connect(mapStateToProps, {
   setGroupDataError,
   setUserDataId,
   setUserDataError,
+  addHiddenUser,
+  excludeHiddenUser,
+  clearHiddenList,
   createGroup,
   createUser,
 })(ControlPannel);

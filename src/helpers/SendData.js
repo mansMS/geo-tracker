@@ -49,7 +49,7 @@ export const geoSender = (groupId, userId) => {
 };
 
 export const createGroup = (groupId) => (dispatch) => {
-  database.ref(groupId).set({ geo: { data: '' } }, (error) => {
+  database.ref(groupId).set({ geo: { data: '' }, users: '' }, (error) => {
     if (error) {
       console.log('Группа не создана, ', error);
     } else {
@@ -58,14 +58,32 @@ export const createGroup = (groupId) => (dispatch) => {
   });
 };
 
-export const createUser = (groupId, userId) => (dispatch) => {
+export const createUser = (groupId, userId, userName, color) => (dispatch) => {
   database
-    .ref(groupId + '/geo/' + userId + '/0000000000000')
-    .set({ latitude: 0, longitude: 0 }, (error) => {
+    .ref(groupId + '/users/' + userId)
+    .set({ name: userName, color }, (error) => {
       if (error) {
         console.log('Пользователь не создан, ', error);
       } else {
         dispatch(setUserDataId(userId));
       }
     });
+
+  database
+    .ref(groupId + '/geo/' + userId + '/0000000000000')
+    .set({ latitude: 0, longitude: 0 }, (error) => {
+      if (error) {
+        console.log('Гео пользователя не созданы, ', error);
+      } else {
+        dispatch(setUserDataId(userId));
+      }
+    });
+};
+
+export const updateName = (groupId, userId, newName) => {
+  database.ref(groupId + '/users/' + userId + '/name').set(newName, (error) => {
+    if (error) {
+      console.log('Не удалось поменять имя: ', error);
+    }
+  });
 };

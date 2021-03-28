@@ -18,6 +18,26 @@ const geoDataError = (error) => {
   };
 };
 
+const usersDataRequested = () => {
+  return {
+    type: 'FETCH_USERS_DATA_REQUEST',
+  };
+};
+
+const usersDataLoaded = (usersData) => {
+  return {
+    type: 'FETCH_USERS_DATA_SUCCESS',
+    payload: usersData,
+  };
+};
+
+const usersDataError = (error) => {
+  return {
+    type: 'FETCH_USERS_DATA_FAILURE',
+    payload: error,
+  };
+};
+
 const setGroupDataId = (id) => {
   return {
     type: 'SET_GROUP_ID',
@@ -46,12 +66,38 @@ const setUserDataError = (error) => {
   };
 };
 
+const addHiddenUser = (id) => {
+  return {
+    type: 'ADD_HIDDEN_USER',
+    payload: id,
+  };
+};
+
+const excludeHiddenUser = (id) => {
+  return {
+    type: 'EXCLUDE_HIDDEN_USER',
+    payload: id,
+  };
+};
+
+const clearHiddenList = () => {
+  return {
+    type: 'CLEAR_HIDDEN_LIST',
+  };
+};
+
 export {
   geoDataRequested,
   geoDataLoaded,
   geoDataError,
+  usersDataRequested,
+  usersDataLoaded,
+  usersDataError,
   setGroupDataId,
   setGroupDataError,
   setUserDataId,
   setUserDataError,
+  addHiddenUser,
+  excludeHiddenUser,
+  clearHiddenList,
 };

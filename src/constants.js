@@ -1,7 +1,13 @@
-export const map = {
-  userColors: {
-    user1id: '#008000',
-    user2id: '#ff0000',
-    user1: '#0000ff',
-  },
-};
+export const colors = [
+  '#008000',
+  '#ff0000',
+  '#0000ff',
+  '#800080',
+  '#ffff00',
+  '#808080',
+  '#1e90ff',
+  '#ff4500',
+  '#8b0000',
+  '#00ff00',
+  '#342f57',
+];

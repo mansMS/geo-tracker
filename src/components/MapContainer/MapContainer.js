@@ -7,15 +7,15 @@ import {
   ZoomControl,
   GeolocationControl,
 } from 'react-yandex-maps';
-import { map } from '../../constants';
 import './MapContainer.css';
 
-function MapContainer({ geoData }) {
+function MapContainer({ geoData, usersData, settingData }) {
   const [zoom, setZoom] = useState(9);
   const mapState = useMemo(() => ({ center: [55.75, 37.57], zoom }), [zoom]);
 
   const usersPoints = geoData.data
     ? Object.keys(geoData.data)
+        .filter((userId) => !settingData.hiddenUsers.includes(userId))
         .map((userId) =>
           Object.keys(geoData.data[userId]).map((timestamp, index) => {
             const date = new Date(+timestamp);
@@ -27,7 +27,7 @@ function MapContainer({ geoData }) {
                 latitude: geoData.data[userId][timestamp].latitude,
                 longitude: geoData.data[userId][timestamp].longitude,
               },
-              color: map.userColors[userId],
+              color: usersData.data[userId].color,
               opacity: (Object.keys(geoData.data[userId]).length - index) / 10,
               date: date.toLocaleString(),
               time: date.toLocaleTimeString(),
@@ -82,8 +82,8 @@ function MapContainer({ geoData }) {
   );
 }
 
-const mapStateToProps = ({ geoData }) => {
-  return { geoData };
+const mapStateToProps = ({ geoData, usersData, settingData }) => {
+  return { geoData, usersData, settingData };
 };
 
 export default connect(mapStateToProps)(MapContainer);
