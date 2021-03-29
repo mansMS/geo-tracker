@@ -21,14 +21,15 @@ function MapContainer({ geoData, usersData, settingData }) {
             const date = new Date(+timestamp);
             return {
               key: userId.toString() + timestamp.toString(),
-              userId,
+              name: usersData.data[userId].name,
               timestamp,
               coords: {
                 latitude: geoData.data[userId][timestamp].latitude,
                 longitude: geoData.data[userId][timestamp].longitude,
               },
               color: usersData.data[userId].color,
-              opacity: (Object.keys(geoData.data[userId]).length - index) / 10,
+              opacity:
+                (index / Object.keys(geoData.data[userId]).length) * 0.7 + 0.3,
               date: date.toLocaleString(),
               time: date.toLocaleTimeString(),
             };
@@ -57,15 +58,15 @@ function MapContainer({ geoData, usersData, settingData }) {
             options={{ position: { bottom: 200, right: 10 } }}
           />
           {usersPoints.map(
-            ({ key, userId, coords, color, opacity, date, time }) => (
+            ({ key, name, coords, color, opacity, date, time }) => (
               <Circle
                 key={key}
                 geometry={[[coords.latitude, coords.longitude], 0]}
                 properties={{
                   hintContent: time,
                   balloonContent: '2Текст подсказки',
-                  balloonContentBody: userId,
-                  balloonContentFooter: time,
+                  balloonContentBody: name,
+                  balloonContentFooter: date,
                 }}
                 options={{
                   draggable: false,
